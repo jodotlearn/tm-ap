@@ -8,11 +8,13 @@ import { SharedZorroModule } from './shared-zorro/shared-zorro.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
+import { HomeComponent } from './pages/home/home.component';
 
 @NgModule({
     declarations: [
         AppComponent,
-        LoginComponent
+        LoginComponent,
+        HomeComponent
     ],
     imports: [
         BrowserModule

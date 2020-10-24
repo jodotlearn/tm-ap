@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'app-login',
@@ -8,26 +10,35 @@ import { AuthService } from '../services/auth.service';
     styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
+    constructor(
+        private fb: FormBuilder,
+        private authService: AuthService,
+        private router: Router) {
+    }
+
     validateForm!: FormGroup;
 
     submitForm(): void {
-        for (const i in this.validateForm.controls) {
+        for (const i of Object.keys(this.validateForm.controls)) {
             this.validateForm.controls[i].markAsDirty();
             this.validateForm.controls[i].updateValueAndValidity();
         }
-        console.log(this.validateForm.controls.username.value);
-        this.authService.login(
-            this.validateForm.controls.username.value
-            , this.validateForm.controls.password.value)
-        .subscribe( result => {
-            let jwt = result.headers.get('authorization').replace('Bearer ', '')
-            sessionStorage.setItem("id_token", jwt);
-        });
+        if (!this.validateForm.invalid){
+            if (environment.production){
+                this.authService.login(
+                    this.validateForm.controls.username.value, this.validateForm.controls.password.value)
+                .subscribe( result => {
+                    const jwt = result.headers.get('authorization').replace('Bearer ', '');
+                    this.authService.storeToken(jwt);
+                    this.router.navigate(['']);
+                });
+            } else {
+                this.authService.storeToken('only_for_dev_testing');
+                this.router.navigate(['']);
+            }
+        }
 
     }
-
-    constructor(private fb: FormBuilder, private authService: AuthService) { }
-
     ngOnInit(): void {
         this.validateForm = this.fb.group({
             username: [null, [Validators.required]],
